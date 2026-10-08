@@ -40,3 +40,7 @@ If the token secret is missing, the workflow skips the deploy with a warning.
 `wrangler deploy` keeps the Worker secrets already set on Cloudflare.
 
 Local: `npx wrangler dev` (put the same secrets in `.dev.vars`). Wrangler 4 needs Node 22+.
+
+## Deploys
+
+Every merge to `main` deploys automatically to https://hello-world.agenticaiace.workers.dev through GitHub Actions.

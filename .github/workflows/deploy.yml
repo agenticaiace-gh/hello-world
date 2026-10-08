@@ -1,0 +1,44 @@
+name: Deploy Worker
+
+# Deploys the hello-world Worker to Cloudflare on every push/merge to main.
+# Worker secrets (SUPABASE_URL, SUPABASE_KEY) live on the Worker itself and are
+# kept by `wrangler deploy`; they are never stored in this repo or workflow.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      HAS_CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+    steps:
+      - name: Skip if Cloudflare token is not configured
+        if: env.HAS_CF_TOKEN != 'true'
+        run: echo "::warning title=Deploy skipped::Repo secret CLOUDFLARE_API_TOKEN is not set, so nothing was deployed."
+
+      - uses: actions/checkout@v7
+        if: env.HAS_CF_TOKEN == 'true'
+
+      - uses: actions/setup-node@v7
+        if: env.HAS_CF_TOKEN == 'true'
+        with:
+          node-version: 22
+
+      - name: Deploy with Wrangler
+        if: env.HAS_CF_TOKEN == 'true'
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.148.0"
+          command: deploy

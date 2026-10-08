@@ -30,7 +30,13 @@ npx wrangler secret put SUPABASE_KEY
 
 ## Deploys
 
-Cloudflare Workers Builds (when connected to the GitHub repo) runs
-`npx wrangler deploy` on every push/merge to `main`.
+GitHub Actions (`.github/workflows/deploy.yml`) runs `wrangler deploy` on every
+push/merge to `main` (and on manual "Run workflow"). It needs two repo secrets:
 
-Local: `npx wrangler dev` (put the same secrets in `.dev.vars`).
+- `CLOUDFLARE_API_TOKEN`: a Cloudflare API token with Workers Scripts edit access
+- `CLOUDFLARE_ACCOUNT_ID`: the Cloudflare account ID
+
+If the token secret is missing, the workflow skips the deploy with a warning.
+`wrangler deploy` keeps the Worker secrets already set on Cloudflare.
+
+Local: `npx wrangler dev` (put the same secrets in `.dev.vars`). Wrangler 4 needs Node 22+.
